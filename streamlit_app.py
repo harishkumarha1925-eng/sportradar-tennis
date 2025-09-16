@@ -15,7 +15,6 @@ from fetchers.fetch_complexes import fetch_complexes, process_and_store_complexe
 from fetchers.fetch_doubles_rankings import fetch_doubles_rankings, process_and_store_rankings
 
 # Queries import (after db init)
-# If a DB error happens here, we'll catch later and show a friendly message.
 try:
     from queries import (
         competitions_with_category, count_competitions_by_category, find_doubles,
@@ -28,7 +27,6 @@ try:
         run_query
     )
 except Exception as e:
-    # If import fails due to DB operational issues, we allow the app to start but show message later.
     queries_import_error = e
 else:
     queries_import_error = None
@@ -97,12 +95,21 @@ if st.sidebar.button("Run initial ETL (fetch & populate DB)"):
             st.stop()
 
     st.balloons()
-    st.experimental_rerun()
+    # ✅ Safe fallback instead of st.experimental_rerun()
+    try:
+        rerun = getattr(st, "experimental_rerun", None)
+        if callable(rerun):
+            rerun()
+        else:
+            st.success("ETL finished — please refresh the page to see the new data.")
+            st.stop()
+    except Exception:
+        st.success("ETL finished — please refresh the page to see the new data.")
+        st.stop()
 
 # ========== App pages / UI ==========
 st.title("Game Analytics — Tennis (Sportradar)")
 
-# Show friendly message if queries import failed (likely DB not ready)
 if queries_import_error:
     st.error(
         "App could not load query helpers. This usually means the database isn't ready yet. "
@@ -208,4 +215,5 @@ elif menu == "Run SQL":
             st.error(f"Error: {e}")
 
 # End of file
+
 
