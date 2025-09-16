@@ -1,16 +1,27 @@
 # streamlit_app.py
 import streamlit as st
-import pandas as pd
-import plotly.express as px
-from queries import (
-    competitions_with_category, count_competitions_by_category, find_doubles,
-    competitions_in_category, parent_and_subcompetitions, type_distribution_by_category,
-    top_level_competitions, venues_with_complex_name, count_venues_by_complex,
-    venues_in_country, venues_timezones, complexes_with_multiple_venues,
-    venues_grouped_by_country, venues_for_complex,
-    competitors_with_rank_and_points, top5_competitors, stable_rank_competitors,
-    total_points_by_country, count_competitors_per_country, highest_points_current_week
-)
+from db_handler import init_db
+from sqlalchemy.exc import OperationalError
+
+# Initialize DB (create tables if missing)
+init_db()
+
+# Now import the query functions (after init_db to prevent race)
+try:
+    from queries import (
+        competitions_with_category, count_competitions_by_category, find_doubles,
+        competitions_in_category, parent_and_subcompetitions, type_distribution_by_category,
+        top_level_competitions, venues_with_complex_name, count_venues_by_complex,
+        venues_in_country, venues_timezones, complexes_with_multiple_venues,
+        venues_grouped_by_country, venues_for_complex,
+        competitors_with_rank_and_points, top5_competitors, stable_rank_competitors,
+        total_points_by_country, count_competitors_per_country, highest_points_current_week
+    )
+except OperationalError as e:
+    st.error("Database not ready. Initializing database — please wait and refresh the app.")
+    # attempt to initialize DB again and stop further execution
+    init_db()
+    st.stop()
 
 st.set_page_config(layout="wide", page_title="Sportradar Tennis Explorer")
 
