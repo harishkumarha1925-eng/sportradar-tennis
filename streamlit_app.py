@@ -1,10 +1,26 @@
-# streamlit_app.py
-import streamlit as st
-from db_handler import init_db
-from sqlalchemy.exc import OperationalError
+from fetchers.fetch_competitions import fetch_competitions, process_and_store_competitions
+from fetchers.fetch_complexes import fetch_complexes, process_and_store_complexes
+from fetchers.fetch_doubles_rankings import fetch_doubles_rankings, process_and_store_rankings
+from db_handler import SessionLocal
+from sqlalchemy import text
 
-# Initialize DB (create tables if missing)
-init_db()
+st.sidebar.header("Admin")
+if st.sidebar.button("Run initial ETL (fetch & populate DB)"):
+    # Run ETL once, show progress
+    with st.spinner("Running ETL — fetching competitions..."):
+        ...
+    # (rest of your snippet unchanged)
+
+# small helper to show counts
+def db_counts():
+    ...
+
+c_comp, c_ven, c_rank = db_counts()
+st.sidebar.markdown(f"**DB Status:**\n- Competitions: {c_comp}\n- Venues: {c_ven}\n- Rankings: {c_rank}")
+# ---------------------------
+
+# 👇 Then continue with your main dashboard UI
+st.title("Game Analytics — Tennis (Sportradar)")
 
 # Now import the query functions (after init_db to prevent race)
 try:
